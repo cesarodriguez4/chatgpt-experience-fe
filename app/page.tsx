@@ -1,7 +1,28 @@
+'use client';
+
+import { useState } from "react";
 import { ReceiverMessage } from "./components/ReceiverMessage";
 import { SenderMessage } from "./components/SenderMessage";
 
+
+interface Message {
+  message: string;
+  type: "sender" | "receiver";
+}
+
 export default function Home() {
+  const [message, setMessage] = useState<string>("");
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const handleMessageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setMessage(event.target.value);
+  }
+
+  const handleQuestionSent = () => {
+    setMessages([...messages, { message, type: "sender" }, { message, type: "receiver" }]);
+    setMessage("");
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
@@ -14,15 +35,20 @@ export default function Home() {
       </div>
 
       <div className="flex flex-col items-center justify-center w-full max-w-5xl gap-4 mt-16">
-        <SenderMessage message="Hello, how can I help you today?" />
-        <ReceiverMessage message="I need help with my computer." />
+        { messages.length > 0 && messages.map((message, index) => {
+          if (message.type === "sender") {
+            return <SenderMessage key={index} message={message.message} />
+          } else {
+            return <ReceiverMessage key={index} message={message.message} />
+          }
+        })}
       </div>
 
       <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
       </div>
       <div>
-        <input type="text" placeholder="Ask me anything" className="p-4 border border-gray-300 rounded-lg dark:border-neutral-800" />
-        <button className="p-4 ml-2 bg-gray-100 rounded-lg dark:bg-neutral-800/30">Send</button>
+        <input type="text" value={message} onChange={handleMessageChange}  placeholder="Ask me anything" className="p-4 border border-gray-300 rounded-lg dark:border-neutral-800" />
+        <button className="p-4 ml-2 bg-gray-100 rounded-lg dark:bg-neutral-800/30" onClick={handleQuestionSent}>Send</button>
       </div>
       <div>
         <p className="m-0 text-sm text-center text-gray-500 dark:text-neutral-500">

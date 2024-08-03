@@ -13,14 +13,35 @@ interface Message {
 export default function Home() {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
 
   const handleMessageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);
   }
 
   const handleQuestionSent = () => {
-    setMessages([...messages, { message, type: "sender" }, { message, type: "receiver" }]);
-    setMessage("");
+    const endpoint = process.env.NEXT_PUBLIC_BASE_URL + "/chatgpt/query";
+    setIsLoading(true);
+    setError(false);
+    fetch(endpoint , {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query: message }),
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      setMessages([...messages, { message, type: "sender" }, { message: data.response, type: "receiver" }]);
+      setMessage("");
+    })
+    .catch((error) => {
+      setError(true);
+    })
+    .finally(() => {
+      setIsLoading(false);
+    });
   }
 
   return (
@@ -47,8 +68,9 @@ export default function Home() {
       <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
       </div>
       <div>
-        <input type="text" value={message} onChange={handleMessageChange}  placeholder="Ask me anything" className="p-4 border border-gray-300 rounded-lg dark:border-neutral-800" />
-        <button className="p-4 ml-2 bg-gray-100 rounded-lg dark:bg-neutral-800/30" onClick={handleQuestionSent}>Send</button>
+        <input type="text" value={message} onChange={handleMessageChange}  placeholder="Ask me anything" className="p-4 border border-gray-300 rounded-lg dark:border-neutral-800 dark:text-gray-700" />
+        <button className="p-4 ml-2 bg-gray-100 rounded-lg dark:bg-neutral-800/30" onClick={handleQuestionSent}>{isLoading ? "..." : "Send"}</button>
+        <div className="text-red-500 mt-2">{error && "An error occurred"}</div>
       </div>
       <div>
         <p className="m-0 text-sm text-center text-gray-500 dark:text-neutral-500">

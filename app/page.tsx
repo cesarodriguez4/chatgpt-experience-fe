@@ -20,6 +20,12 @@ export default function Home() {
     setMessage(event.target.value);
   }
 
+  const onEnterPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      handleQuestionSent();
+    }
+  }
+
   const handleQuestionSent = () => {
     const endpoint = process.env.NEXT_PUBLIC_BASE_URL + "/chatgpt/query";
     setIsLoading(true);
@@ -45,7 +51,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center justify-between p-4 md:p-24" onKeyDown={onEnterPress}>
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
       </div>
 
@@ -55,7 +61,7 @@ export default function Home() {
         </h2>
       </div>
 
-      <div className="flex flex-col items-center justify-center w-full max-w-5xl gap-4 mt-16">
+      <div className="flex flex-col items-center justify-center w-full max-w-5xl gap-4 mt-16 mb-4">
         { messages.length > 0 && messages.map((message, index) => {
           if (message.type === "sender") {
             return <SenderMessage key={index} message={message.message} />
@@ -67,8 +73,8 @@ export default function Home() {
 
       <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
       </div>
-      <div>
-        <input type="text" value={message} onChange={handleMessageChange}  placeholder="Ask me anything" className="p-4 border border-gray-300 rounded-lg dark:border-neutral-800 dark:text-gray-700" />
+      <div className="w-full flex justify-center">
+        <input type="text" value={message} onChange={handleMessageChange}  placeholder="Ask me anything" className="p-4 border w-11/12 border-gray-300 rounded-lg dark:border-neutral-800 dark:text-gray-700" />
         <button className="p-4 ml-2 bg-gray-100 rounded-lg dark:bg-neutral-800/30" onClick={handleQuestionSent}>{isLoading ? "..." : "Send"}</button>
         <div className="text-red-500 mt-2">{error && "An error occurred"}</div>
       </div>
